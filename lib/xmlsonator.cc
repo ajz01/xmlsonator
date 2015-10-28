@@ -54,6 +54,8 @@ public:
                  nsURI,
                  nsURI,
                  value.c_str() );
+
+        xsr.object_->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname),String::NewFromUtf8(xsr.isolate_,value.c_str()));
       }
    }
 
@@ -87,6 +89,9 @@ public:
       vprintf( msg, args );
       va_end(args);
    }
+
+   Local<Object> object_;
+   Isolate* isolate_;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
@@ -95,7 +100,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
 
   Local<Object> bufferObj = args[0]->ToObject();
   char* bufferData   = Buffer::Data(bufferObj);
-  size_t bufferLength = Buffer::Length(bufferObj);
+   size_t bufferLength = Buffer::Length(bufferObj);
 
    xmlSAXHandler saxHandler;
    memset( &saxHandler, 0, sizeof(saxHandler) );
@@ -106,6 +111,8 @@ void parse(const FunctionCallbackInfo<Value>& args) {
    saxHandler.error = &Xmlsonator::error;
 
    Xmlsonator xsr;
+   xsr.object_ = Object::New(isolate);
+   xsr.isolate_ = isolate;
    int result = xmlSAXUserParseMemory( &saxHandler, &xsr, bufferData, int(bufferLength) );
    if ( result != 0 )
    {
