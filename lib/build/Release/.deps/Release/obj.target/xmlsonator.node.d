@@ -1,0 +1,1 @@
+cmd_Release/obj.target/xmlsonator.node := g++ -shared -pthread -rdynamic -m64  -Wl,-soname=xmlsonator.node -o Release/obj.target/xmlsonator.node -Wl,--start-group Release/obj.target/xmlsonator/xmlsonator.o -Wl,--end-group -lxml++-2.6 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lsigc-2.0 -lglib-2.0 -L/usr/lib/
