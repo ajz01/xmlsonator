@@ -8,6 +8,7 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace v8;
@@ -16,6 +17,30 @@ using namespace node;
 class Xmlsonator
 {
 public:
+
+   static void startElement(void * ctx, const xmlChar * name, const xmlChar ** attrs) {
+      /*printf( "startElement: name = '%s' attrs = '%s'\n", name, attrs);
+      Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+      Local<Object> obj = Object::New(xsr.isolate_);
+      obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)name), Object::New(xsr.isolate_));
+      xsr.objs_.push_back(obj);*/
+   }
+
+  static void endElement(void * ctx, const xmlChar * name) {
+    /*Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    Local<Object> objr = xsr.objs_[0];
+    if(xsr.objs_.size() > 2) {
+      vector<Local<Object>> objs;
+      for(int i = 1; i < xsr.objs_.size(); i++) {
+        Local<Object> obj = xsr.objs_.back();
+        xsr.objs_.pop_back();
+        objs.push_back(obj);
+      }
+
+    } //else
+
+    xsr.object_ = objr;*/
+  }
 
    static void startElementNs( void * ctx,
                                const xmlChar * localname,
@@ -28,12 +53,16 @@ public:
                                const xmlChar ** attributes )
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
-      printf( "startElementNs: name = '%s' prefix = '%s' uri = (%p)'%s'\n", localname, prefix, URI, URI );
+      Local<Object> obj = Object::New(xsr.isolate_);
+      obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)localname));
+      pair<char*, Local<Object> > p((char*)localname, obj);
+      xsr.objs_.push_back(p);
+      //printf( "startElementNs: name = '%s' prefix = '%s' uri = (%p)'%s'\n", localname, prefix, URI, URI );
       for ( int indexNamespace = 0; indexNamespace < nb_namespaces; ++indexNamespace )
       {
          const xmlChar *prefix = namespaces[indexNamespace*2];
          const xmlChar *nsURI = namespaces[indexNamespace*2+1];
-         printf( "  namespace: name='%s' uri=(%p)'%s'\n", prefix, nsURI, nsURI );
+         //printf( "  namespace: name='%s' uri=(%p)'%s'\n", prefix, nsURI, nsURI );
       }
 
       unsigned int index = 0;
@@ -47,15 +76,15 @@ public:
          const xmlChar *valueBegin = attributes[index+3];
          const xmlChar *valueEnd = attributes[index+4];
          std::string value( (const char *)valueBegin, (const char *)valueEnd );
-         printf( "  %sattribute: localname='%s', prefix='%s', uri=(%p)'%s', value='%s'\n",
+         /*printf( "  %sattribute: localname='%s', prefix='%s', uri=(%p)'%s', value='%s'\n",
                  indexAttribute >= (nb_attributes - nb_defaulted) ? "defaulted " : "",
                  localname,
                  prefix,
                  nsURI,
                  nsURI,
-                 value.c_str() );
+                 value.c_str() );*/
 
-        xsr.object_->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname),String::NewFromUtf8(xsr.isolate_,value.c_str()));
+          obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
       }
    }
 
@@ -65,14 +94,27 @@ public:
                              const xmlChar * URI )
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
-      printf( "endElementNs: name = '%s' prefix = '%s' uri = '%s'\n", localname, prefix, URI );
+      Local<Object> objr = xsr.objs_[0].second;
+      if(xsr.objs_.size() > 2) {
+        Local<Array> array = Array::New(xsr.isolate_, xsr.objs_.size());
+        for(int i = 1; i < xsr.objs_.size(); i++) {
+          Local<Object> obj = xsr.objs_.back().second;
+          array->Set(i-1, obj);
+        }
+        objr->Set(String::NewFromUtf8(xsr.isolate_,xsr.objs_[0].first), array);
+      } else
+        objr->Set(String::NewFromUtf8(xsr.isolate_,xsr.objs_[0].first), xsr.objs_[1].second);
+
+      xsr.objs_.clear();
+
+      xsr.object_ = objr;
    }
 
    static void error( void * ctx,
                       const char * msg,
                       ... )
    {
-      Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+      //Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       va_list args;
       va_start(args, msg);
       vprintf( msg, args );
@@ -83,15 +125,18 @@ public:
                         const char * msg,
                         ... )
    {
-      Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+      //Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       va_list args;
       va_start(args, msg);
       vprintf( msg, args );
       va_end(args);
    }
 
+   // return Object
    Local<Object> object_;
    Isolate* isolate_;
+   // object stack
+   vector<pair<char*, Local<Object>> > objs_;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
@@ -100,28 +145,30 @@ void parse(const FunctionCallbackInfo<Value>& args) {
 
   Local<Object> bufferObj = args[0]->ToObject();
   char* bufferData   = Buffer::Data(bufferObj);
-   size_t bufferLength = Buffer::Length(bufferObj);
+  size_t bufferLength = Buffer::Length(bufferObj);
 
-   xmlSAXHandler saxHandler;
-   memset( &saxHandler, 0, sizeof(saxHandler) );
-   saxHandler.initialized = XML_SAX2_MAGIC;
-   saxHandler.startElementNs = &Xmlsonator::startElementNs;
-   saxHandler.endElementNs = &Xmlsonator::endElementNs;
-   saxHandler.warning = &Xmlsonator::warning;
-   saxHandler.error = &Xmlsonator::error;
+  xmlSAXHandler saxHandler;
+  memset( &saxHandler, 0, sizeof(saxHandler) );
+  saxHandler.initialized = XML_SAX2_MAGIC;
+  saxHandler.startElement = &Xmlsonator::startElement;
+  saxHandler.startElementNs = &Xmlsonator::startElementNs;
+  saxHandler.endElementNs = &Xmlsonator::endElementNs;
+  saxHandler.warning = &Xmlsonator::warning;
+  saxHandler.error = &Xmlsonator::error;
 
-   Xmlsonator xsr;
-   xsr.object_ = Object::New(isolate);
-   xsr.isolate_ = isolate;
-   int result = xmlSAXUserParseMemory( &saxHandler, &xsr, bufferData, int(bufferLength) );
-   if ( result != 0 )
-   {
-      printf("Failed to parse document.\n" );
-   }
+  Xmlsonator xsr;
+  xsr.object_ = Object::New(isolate);
+  xsr.isolate_ = isolate;
+  int result = xmlSAXUserParseMemory( &saxHandler, &xsr, bufferData, int(bufferLength) );
+  if ( result != 0 )
+  {
+    printf("Failed to parse document.\n" );
+  } else
+  args.GetReturnValue().Set(xsr.object_);
 
-   xmlCleanupParser();
+  xmlCleanupParser();
 
-   xmlMemoryDump();
+  xmlMemoryDump();
 
 }
 
