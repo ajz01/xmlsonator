@@ -1,4 +1,4 @@
-var xsr = require('xmlsonator');
+var xsr = require('./xmlsonator.js');
 
 var xml = "<xsr:Xmlsonator xmlns:xsr='http://xmlsonator.org/schema'>" +
       "<xsr:Sample name='test1' emptyAttribute='' xsr:ns_id='xmlson'>" +

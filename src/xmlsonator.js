@@ -1,5 +1,5 @@
 var xsr = require('../lib/build/Release/xmlsonator');
 
-exports.parse = function(buffer) {
-  return xsr.parse(buffer);
+exports.parseXML = function(buffer) {
+  return xsr.parseXML(buffer);
 }
