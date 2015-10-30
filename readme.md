@@ -1,9 +1,13 @@
 # xmlsonator
-A node.js native add-on that uses libxml++ to provide fast xml to json parsing.
+A high speed xml to json converter built on libxml++.
+Benchmark shows potentially 20 times faster than other popular xml to json packages.
 
 # Prerequisites
 install libxml++.
-# apt-get install libxml++2.6-dev libxml++2.6-doc
+
+[libxml](www.xmlsoft.org)
+
+apt-get install libxml++2.6-dev
 
 # Usage
 
@@ -11,4 +15,8 @@ install libxml++.
 >npm install xmlsonator  
 
 ## API
-This project is just getting started and is not fully functional. Please wait until release is 1.0 or > before using.
+This project is just getting started and is not tested with all valid xml.
+
+Please wait until release is 1.0 or > before using.
+
+Better yet, look for the github repo and contribute.
