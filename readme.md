@@ -1,11 +1,12 @@
 # xmlsonator
 A high speed xml to json converter built on libxml++.
+
 Benchmark shows potentially 20 times faster than other popular xml to json packages.
 
 # Prerequisites
 install libxml++.
 
-[libxml](www.xmlsoft.org)
+[libxml](http://www.xmlsoft.org)
 
 apt-get install libxml++2.6-dev
 
