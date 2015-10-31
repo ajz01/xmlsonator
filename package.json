@@ -1,6 +1,6 @@
 {
   "name": "xmlsonator",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "high speed xml to json parser",
   "main": "./src/xmlsonator.js",
   "scripts": {
@@ -16,8 +16,8 @@
   },
   "author": "Andrew Zdenek",
   "license": "MIT",
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/ajz01/xmlsonator"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajz01/xmlsonator"
   }
 }
