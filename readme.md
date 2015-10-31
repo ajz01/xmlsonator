@@ -28,7 +28,7 @@ and performance.
 
 ## Example program with performance results
 
-'''javascript
+```javascript
 var xsr = require('xmlsonator');
 
 var xml = "<menu id='file' value='File'> \
@@ -51,4 +51,4 @@ for(var i = 0; i < n; i++)
 console.timeEnd(n + '-parses');
 
 console.log(jobj);
-'''
+```
