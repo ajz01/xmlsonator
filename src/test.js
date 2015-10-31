@@ -15,11 +15,13 @@ var xml = "<menu id='file' value='File'> \
 
 var buffer = Buffer(xml, 'utf-8');
 
-console.time('n-parses');
+var n = 10000
 
-for(var i = 0; i < 10000; i++)
+console.time(n + '-parses');
+
+for(var i = 0; i < n; i++)
   var jobj = xsr.toJson(buffer);
 
-console.timeEnd('n-parses');
+console.timeEnd(n + '-parses');
 
 console.log(jobj);
