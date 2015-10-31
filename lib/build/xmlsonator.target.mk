@@ -34,15 +34,7 @@ INCS_Debug := \
 	-I/home/andrew/.node-gyp/0.12.7/src \
 	-I/home/andrew/.node-gyp/0.12.7/deps/uv/include \
 	-I/home/andrew/.node-gyp/0.12.7/deps/v8/include \
-	-I/usr/include/libxml2 \
-	-I/usr/include/glibmm-2.4 \
-	-I/usr/lib/x86_64-linux-gnu/glibmm-2.4/include \
-	-I/usr/include/sigc++-2.0 \
-	-I/usr/lib/x86_64-linux-gnu/sigc++-2.0/include \
-	-I/usr/include/glib-2.0 \
-	-I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
-	-I/usr/include/libxml++-2.6 \
-	-I/usr/lib/libxml++-2.6/include
+	-I$(srcdir)/vendor/libxml/include
 
 DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=xmlsonator' \
@@ -78,21 +70,16 @@ INCS_Release := \
 	-I/home/andrew/.node-gyp/0.12.7/src \
 	-I/home/andrew/.node-gyp/0.12.7/deps/uv/include \
 	-I/home/andrew/.node-gyp/0.12.7/deps/v8/include \
-	-I/usr/include/libxml2 \
-	-I/usr/include/glibmm-2.4 \
-	-I/usr/lib/x86_64-linux-gnu/glibmm-2.4/include \
-	-I/usr/include/sigc++-2.0 \
-	-I/usr/lib/x86_64-linux-gnu/sigc++-2.0/include \
-	-I/usr/include/glib-2.0 \
-	-I/usr/lib/x86_64-linux-gnu/glib-2.0/include \
-	-I/usr/include/libxml++-2.6 \
-	-I/usr/lib/libxml++-2.6/include
+	-I$(srcdir)/vendor/libxml/include
 
 OBJS := \
 	$(obj).target/$(TARGET)/xmlsonator.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)
+
+# Make sure our dependencies are built before any of us.
+$(OBJS): | $(builddir)/xml.a $(obj).target/vendor/libxml/xml.a
 
 # CFLAGS et al overrides must be target-local.
 # See "Target-specific Variable Values" in the GNU Make manual.
@@ -125,14 +112,12 @@ LDFLAGS_Release := \
 	-rdynamic \
 	-m64
 
-LIBS := \
-	-lxml2 \
-	-L/usr/lib/
+LIBS :=
 
 $(obj).target/xmlsonator.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
 $(obj).target/xmlsonator.node: LIBS := $(LIBS)
 $(obj).target/xmlsonator.node: TOOLSET := $(TOOLSET)
-$(obj).target/xmlsonator.node: $(OBJS) FORCE_DO_CMD
+$(obj).target/xmlsonator.node: $(OBJS) $(obj).target/vendor/libxml/xml.a FORCE_DO_CMD
 	$(call do_cmd,solink_module)
 
 all_deps += $(obj).target/xmlsonator.node

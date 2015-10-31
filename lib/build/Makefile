@@ -303,13 +303,18 @@ $(obj).$(TOOLSET)/%.o: $(obj)/%.s FORCE_DO_CMD
 
 ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
     $(findstring $(join ^,$(prefix)),\
+                 $(join ^,vendor/libxml/libxml.target.mk)))),)
+  include vendor/libxml/libxml.target.mk
+endif
+ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
+    $(findstring $(join ^,$(prefix)),\
                  $(join ^,xmlsonator.target.mk)))),)
   include xmlsonator.target.mk
 endif
 
 quiet_cmd_regen_makefile = ACTION Regenerating $@
 cmd_regen_makefile = cd $(srcdir); /usr/local/lib/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/home/andrew/xmlsonator/lib/build/config.gypi -I/usr/local/lib/node_modules/node-gyp/addon.gypi -I/home/andrew/.node-gyp/0.12.7/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/home/andrew/.node-gyp/0.12.7" "-Dnode_gyp_dir=/usr/local/lib/node_modules/node-gyp" "-Dmodule_root_dir=/home/andrew/xmlsonator/lib" binding.gyp
-Makefile: $(srcdir)/../../.node-gyp/0.12.7/common.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp $(srcdir)/../../../../usr/local/lib/node_modules/node-gyp/addon.gypi
+Makefile: $(srcdir)/binding.gyp $(srcdir)/../../.node-gyp/0.12.7/common.gypi $(srcdir)/build/config.gypi $(srcdir)/vendor/libxml/libxml.gyp $(srcdir)/../../../../usr/local/lib/node_modules/node-gyp/addon.gypi
 	$(call do_cmd,regen_makefile)
 
 # "all" is a concatenation of the "all" targets from all the included
