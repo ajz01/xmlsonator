@@ -126,12 +126,7 @@ LDFLAGS_Release := \
 	-m64
 
 LIBS := \
-	-lxml++-2.6 \
 	-lxml2 \
-	-lglibmm-2.4 \
-	-lgobject-2.0 \
-	-lsigc-2.0 \
-	-lglib-2.0 \
 	-L/usr/lib/
 
 $(obj).target/xmlsonator.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
