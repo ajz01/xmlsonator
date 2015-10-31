@@ -58,11 +58,11 @@ public:
          std::string value( (const char *)valueBegin, (const char *)valueEnd );
          tmp->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
       }
+
+      // if the element has attributes create an object otherwise store the name
       if(nb_attributes) {
-        //printf("name: %s\n", localname);
         obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
       } else {
-        //obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), Object::New(xsr.isolate_));
         xsr.beginelem = (char*)localname;
       }
       xsr.inelem = true;
@@ -77,6 +77,7 @@ public:
       Local<Object> obj = xsr.ostack.back();
       xsr.ostack.pop_back();
 
+      // if last callback was also an element end
       if(!xsr.inelem) {
         int n = xsr.istack.size();
         Local<Object> tmp = xsr.istack.back();
@@ -85,13 +86,12 @@ public:
         v8::String::Utf8Value utfname(p->Get(p->Length())->ToString());
         string strname(*utfname);
         if(n == 1) {
+          // there is just an element no array
           obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
         } else if(n > 1) {
+          // get the array and unwrap each element's name
           Local<Array> array = Array::New(xsr.isolate_, n);
           for(int i = 0; i < n; i++) {
-            //Local<Object> tmp2 = tmp->Get(0)->ToObject();
-            //if(tmp->Get(1) != v8::Undefined(xsr.isolate_)) {
-          //    Local<Object> s = tmp->Get(0)->ToObject();
             Local<Array> p2 = tmp->GetPropertyNames();
             v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
             string strname2(*utfname2);
@@ -99,14 +99,11 @@ public:
             Local<Array> p3 = tmp2->GetPropertyNames();
             v8::String::Utf8Value utfname3(p3->Get(0)->ToString());
             string strname3(*utfname3);
-            printf("string: %s\n", strname3.c_str());
-            //tmp->Delete(p2->Get(0)->ToString());
-            //tmp->Set(String::NewFromUtf8(xsr.isolate_,strname3.c_str()), tmp2);
-          //}
             array->Set(i, tmp2);
             Local<Object> tmp = xsr.istack.back();
             xsr.istack.pop_back();
           }
+          // add the array
           Local<Array> p2 = tmp->GetPropertyNames();
           v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
           string strname2(*utfname2);
