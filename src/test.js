@@ -36,9 +36,36 @@ var xml3 = '<widget> \
     </text> \
 </widget>';
 
+xml4 = '<menu> \
+    <header>Adobe SVG Viewer</header> \
+    <item action="Open" id="Open">Open</item> \
+    <item action="OpenNew" id="OpenNew">Open New</item> \
+    <separator/> \
+    <item action="ZoomIn" id="ZoomIn">Zoom In</item> \
+    <item action="ZoomOut" id="ZoomOut">Zoom Out</item> \
+    <item action="OriginalView" id="OriginalView">Original View</item> \
+    <separator/> \
+    <item action="Quality" id="Quality">Quality</item> \
+    <item action="Pause" id="Pause">Pause</item> \
+    <item action="Mute" id="Mute">Mute</item> \
+    <separator/> \
+    <item action="Find" id="Find">Find...</item> \
+    <item action="FindAgain" id="FindAgain">Find Again</item> \
+    <item action="Copy" id="Copy">Copy</item> \
+    <item action="CopyAgain" id="CopyAgain">Copy Again</item> \
+    <item action="CopySVG" id="CopySVG">Copy SVG</item> \
+    <item action="ViewSVG" id="ViewSVG">View SVG</item> \
+    <item action="ViewSource" id="ViewSource">View Source</item> \
+    <item action="SaveAs" id="SaveAs">Save As</item> \
+    <separator/> \
+    <item action="Help" id="Help">Help</item> \
+    <item action="About" id="About">About Adobe CVG Viewer...</item> \
+</menu>';
+
 var buffer1 = Buffer(xml1, 'utf-8');
 var buffer2 = Buffer(xml2, 'utf-8');
 var buffer3 = Buffer(xml3, 'utf-8');
+var buffer4 = Buffer(xml4, 'utf-8');
 
 var n = 10000
 
@@ -64,6 +91,15 @@ console.time(n + '-parses');
 
 for(var i = 0; i < n; i++)
   var jobj = xsr.toJson(buffer3);
+
+console.timeEnd(n + '-parses');
+
+console.log(jobj);
+
+console.time(n + '-parses');
+
+for(var i = 0; i < n; i++)
+  var jobj = xsr.toJson(buffer4);
 
 console.timeEnd(n + '-parses');
 
