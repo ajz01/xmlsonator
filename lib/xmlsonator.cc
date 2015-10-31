@@ -22,6 +22,11 @@ class Xmlsonator
 {
 public:
 
+  Xmlsonator(Local<Object> obj, Isolate* isolate) {
+    this->object_ = obj;
+    this->isolate_ = isolate;
+  }
+
    static void startElementNs( void * ctx,
                                const xmlChar * localname,
                                const xmlChar * prefix,
@@ -139,6 +144,10 @@ public:
       va_end(args);
    }
 
+   Local<Object> getObject() { return this->object_; }
+
+private:
+
    // return Object
    Local<Object> object_;
    Isolate* isolate_;
@@ -166,15 +175,15 @@ void parse(const FunctionCallbackInfo<Value>& args) {
   saxHandler.warning = &Xmlsonator::warning;
   saxHandler.error = &Xmlsonator::error;
 
-  Xmlsonator xsr;
-  xsr.object_ = Object::New(isolate);
-  xsr.isolate_ = isolate;
+  Xmlsonator xsr(Object::New(isolate), isolate);
+  //xsr.object_ = Object::New(isolate);
+  //xsr.isolate_ = isolate;
   int result = xmlSAXUserParseMemory( &saxHandler, &xsr, bufferData, int(bufferLength) );
   if ( result != 0 )
   {
     printf("Failed to parse document.\n" );
   } else
-  args.GetReturnValue().Set(xsr.object_);
+  args.GetReturnValue().Set(xsr.getObject());//.object_);
 
   xmlCleanupParser();
 

@@ -18,7 +18,7 @@ var buffer = Buffer(xml, 'utf-8');
 console.time('n-parses');
 
 for(var i = 0; i < 10000; i++)
-  var jobj = xsr.parseXML(buffer);
+  var jobj = xsr.toJson(buffer);
 
 console.timeEnd('n-parses');
 
