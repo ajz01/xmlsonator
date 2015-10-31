@@ -27,7 +27,7 @@ var xml = "<menu id='file' value='File'> \
 
 var buffer = Buffer(xml, 'utf-8');
 
-var n = 10000
+var n = 10000;
 
 console.time(n + '-parses');
 
