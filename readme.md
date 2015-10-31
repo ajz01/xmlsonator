@@ -6,9 +6,11 @@ Benchmark shows potentially 20 times faster than other popular xml to json packa
 # Usage
 This project is just getting started so test your specific xml format before using.
 
-Currently, test cases are being developed to check for both correctness
+There is only one method:
 
-and performance.
+```javascript
+Object = xmlsonator.toJson(Buffer);
+```
 
 ## Example program with performance results
 
@@ -35,4 +37,13 @@ for(var i = 0; i < n; i++)
 console.timeEnd(n + '-parses');
 
 console.log(jobj);
+```
+
+## Results
+```
+10000-parses: 421ms
+{ menu: { id: 'file', value: 'File' },
+  popup:
+   { popup: { popup: '     ' },
+     menuitem: [ [Object], [Object], [Object] ] } }
 ```
