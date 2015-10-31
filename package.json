@@ -1,7 +1,7 @@
 {
   "name": "xmlsonator",
   "version": "0.0.8",
-  "description": "high speed xml to json parser",
+  "description": "high speed xml to json converter",
   "main": "./src/xmlsonator.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
