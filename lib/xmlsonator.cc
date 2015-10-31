@@ -1,3 +1,7 @@
+// xmlsonator - xml to json converter for node using the libxml++ sax parser API
+// Andrew Zdenek - ajz01
+// Oct 27, 2015
+
 #include <node.h>
 #include <node_object_wrap.h>
 #include <node_buffer.h>
@@ -30,9 +34,6 @@ public:
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       Local<Object> obj = Object::New(xsr.isolate_);
-      obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)localname));
-      //pair<char*, Local<Object> > p((char*)localname, obj);
-      //xsr.objs_.push_back(p);
       xsr.ostack.push_back(obj);
       //printf( "startElementNs: name = '%s' prefix = '%s' uri = (%p)'%s'\n", localname, prefix, URI, URI );
       for ( int indexNamespace = 0; indexNamespace < nb_namespaces; ++indexNamespace )
@@ -42,6 +43,8 @@ public:
          //printf( "  namespace: name='%s' uri=(%p)'%s'\n", prefix, nsURI, nsURI );
       }
 
+      Local<Array> attr = Array::New(xsr.isolate_, nb_attributes);
+      Local<Object> tmp = Object::New(xsr.isolate_);
       unsigned int index = 0;
       for ( int indexAttribute = 0;
             indexAttribute < nb_attributes;
@@ -53,16 +56,16 @@ public:
          const xmlChar *valueBegin = attributes[index+3];
          const xmlChar *valueEnd = attributes[index+4];
          std::string value( (const char *)valueBegin, (const char *)valueEnd );
-         /*printf( "  %sattribute: localname='%s', prefix='%s', uri=(%p)'%s', value='%s'\n",
-                 indexAttribute >= (nb_attributes - nb_defaulted) ? "defaulted " : "",
-                 localname,
-                 prefix,
-                 nsURI,
-                 nsURI,
-                 value.c_str() );*/
-
-          obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
+         tmp->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
       }
+      if(nb_attributes) {
+        //printf("name: %s\n", localname);
+        obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
+      } else {
+        //obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), Object::New(xsr.isolate_));
+        xsr.beginelem = (char*)localname;
+      }
+      xsr.inelem = true;
    }
 
    static void endElementNs( void * ctx,
@@ -71,42 +74,50 @@ public:
                              const xmlChar * URI )
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
-      /*Local<Object> objr = xsr.objs_[0].second;
-      if(xsr.objs_.size() > 2) {
-        Local<Array> array = Array::New(xsr.isolate_, xsr.objs_.size());
-        for(int i = 1; i < xsr.objs_.size(); i++) {
-          Local<Object> obj = xsr.objs_.back().second;
-          array->Set(i-1, obj);
-        }
-        objr->Set(String::NewFromUtf8(xsr.isolate_,xsr.objs_[0].first), array);
-      } else
-        objr->Set(String::NewFromUtf8(xsr.isolate_,xsr.objs_[0].first), xsr.objs_[1].second);
-
-      xsr.objs_.clear();
-
-      xsr.object_ = objr;*/
       Local<Object> obj = xsr.ostack.back();
       xsr.ostack.pop_back();
 
-      Local<Array> p = obj->GetPropertyNames();
-      v8::String::Utf8Value v(p->Get(0)->ToString());
-      string name(*v);
-      int n = xsr.istack.size();
-      if(n == 1) {
+      if(!xsr.inelem) {
+        int n = xsr.istack.size();
         Local<Object> tmp = xsr.istack.back();
         xsr.istack.pop_back();
-        obj->Set(String::NewFromUtf8(xsr.isolate_,name.c_str()), tmp);
-      } else if(n > 1) {
-        Local<Array> array = Array::New(xsr.isolate_, n);
-        for(int i = 0; i < n; i++) {
-          Local<Object> tmp = xsr.istack.back();
-          xsr.istack.pop_back();
-          array->Set(i-1, tmp);
+        Local<Array> p = obj->GetPropertyNames();
+        v8::String::Utf8Value utfname(p->Get(p->Length())->ToString());
+        string strname(*utfname);
+        if(n == 1) {
+          obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+        } else if(n > 1) {
+          Local<Array> array = Array::New(xsr.isolate_, n);
+          for(int i = 0; i < n; i++) {
+            //Local<Object> tmp2 = tmp->Get(0)->ToObject();
+            //if(tmp->Get(1) != v8::Undefined(xsr.isolate_)) {
+          //    Local<Object> s = tmp->Get(0)->ToObject();
+            Local<Array> p2 = tmp->GetPropertyNames();
+            v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
+            string strname2(*utfname2);
+            Local<Object> tmp2 = tmp->Get(p2->Get(0)->ToString())->ToObject();
+            Local<Array> p3 = tmp2->GetPropertyNames();
+            v8::String::Utf8Value utfname3(p3->Get(0)->ToString());
+            string strname3(*utfname3);
+            printf("string: %s\n", strname3.c_str());
+            //tmp->Delete(p2->Get(0)->ToString());
+            //tmp->Set(String::NewFromUtf8(xsr.isolate_,strname3.c_str()), tmp2);
+          //}
+            array->Set(i, tmp2);
+            Local<Object> tmp = xsr.istack.back();
+            xsr.istack.pop_back();
+          }
+          Local<Array> p2 = tmp->GetPropertyNames();
+          v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
+          string strname2(*utfname2);
+          obj->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), array);
         }
-        obj->Set(String::NewFromUtf8(xsr.isolate_,name.c_str()), array);
+        xsr.istack.clear();
       }
+
       xsr.istack.push_back(obj);
       xsr.object_ = obj;
+      xsr.inelem = false;
    }
 
    static void error( void * ctx,
@@ -138,6 +149,8 @@ public:
    vector<pair<char*, Local<Object>> > objs_;
    vector<Local<Object>> ostack;
    vector<Local<Object>> istack;
+   bool inelem = false;
+   char* beginelem;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
