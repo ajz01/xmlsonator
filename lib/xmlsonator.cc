@@ -27,6 +27,35 @@ public:
     this->isolate_ = isolate;
   }
 
+  static void	startElement	(void * ctx, const xmlChar * fullname, const xmlChar ** atts) {
+    Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    xsr.startelem = true;
+    xsr.elem = (char*) fullname;
+    printf("element: %s\n", xsr.elem);
+  }
+
+  static void	endElement	(void * ctx, const xmlChar * name) {
+    Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    xsr.startelem = false;
+  }
+
+  static void characters(void * ctx, const xmlChar * ch, int len) {
+    Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    Local<Object> obj = xsr.ostack.back();
+    Local<Array> p = obj->GetPropertyNames();
+    v8::String::Utf8Value utfname(p->Get(0)->ToString());
+    string strname(*utfname);
+    char chars[len + 1];
+    strncpy(chars, (const char *)ch, len);
+    chars[len] = (char)NULL;
+    if(xsr.inelem && len > 0) {
+      //printf("characters: %s has: %s\n", xsr.beginelem, chars);
+      Local<Object> tmp = Object::New(xsr.isolate_);
+      tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,chars));
+      obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+    }
+  }
+
    static void startElementNs( void * ctx,
                                const xmlChar * localname,
                                const xmlChar * prefix,
@@ -48,6 +77,7 @@ public:
          //printf( "  namespace: name='%s' uri=(%p)'%s'\n", prefix, nsURI, nsURI );
       }
 
+      //printf("element: %s\n", localname);
       Local<Array> attr = Array::New(xsr.isolate_, nb_attributes);
       Local<Object> tmp = Object::New(xsr.isolate_);
       unsigned int index = 0;
@@ -62,6 +92,7 @@ public:
          const xmlChar *valueEnd = attributes[index+4];
          std::string value( (const char *)valueBegin, (const char *)valueEnd );
          tmp->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
+         //printf("attribute: %s value: %s\n", localname, value.c_str());
       }
 
       // if the element has attributes create an object otherwise store the name
@@ -157,6 +188,8 @@ private:
    vector<Local<Object>> istack;
    bool inelem = false;
    char* beginelem;
+   bool startelem = false;
+   char* elem;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
@@ -170,6 +203,9 @@ void parse(const FunctionCallbackInfo<Value>& args) {
   xmlSAXHandler saxHandler;
   memset( &saxHandler, 0, sizeof(saxHandler) );
   saxHandler.initialized = XML_SAX2_MAGIC;
+  saxHandler.startElement = &Xmlsonator::startElement;
+  saxHandler.endElement = &Xmlsonator::endElement;
+  saxHandler.characters = &Xmlsonator::characters;
   saxHandler.startElementNs = &Xmlsonator::startElementNs;
   saxHandler.endElementNs = &Xmlsonator::endElementNs;
   saxHandler.warning = &Xmlsonator::warning;
