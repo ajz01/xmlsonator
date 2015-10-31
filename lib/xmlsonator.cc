@@ -28,27 +28,24 @@ public:
   }
 
   static void	startElement	(void * ctx, const xmlChar * fullname, const xmlChar ** atts) {
-    Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    /*Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
     xsr.startelem = true;
     xsr.elem = (char*) fullname;
-    printf("element: %s\n", xsr.elem);
+    printf("element: %s\n", xsr.elem);*/
   }
 
   static void	endElement	(void * ctx, const xmlChar * name) {
-    Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
-    xsr.startelem = false;
+    /*Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
+    xsr.startelem = false;*/
   }
 
   static void characters(void * ctx, const xmlChar * ch, int len) {
     Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
-    Local<Object> obj = xsr.ostack.back();
-    Local<Array> p = obj->GetPropertyNames();
-    v8::String::Utf8Value utfname(p->Get(0)->ToString());
-    string strname(*utfname);
-    char chars[len + 1];
-    strncpy(chars, (const char *)ch, len);
-    chars[len] = (char)NULL;
-    if(xsr.inelem && len > 0) {
+    if(xsr.startelem && len > 0 && !xsr.ostack.empty()) {
+      Local<Object> obj = xsr.ostack.back();
+      char chars[len + 1];
+      strncpy(chars, (const char *)ch, len);
+      chars[len] = (char)NULL;
       //printf("characters: %s has: %s\n", xsr.beginelem, chars);
       Local<Object> tmp = Object::New(xsr.isolate_);
       tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,chars));
@@ -100,6 +97,8 @@ public:
         obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
       } else {
         xsr.beginelem = (char*)localname;
+        //printf("start: %s\n", xsr.beginelem);
+        xsr.startelem = true;
       }
       xsr.inelem = true;
    }
@@ -151,6 +150,7 @@ public:
       xsr.istack.push_back(obj);
       xsr.object_ = obj;
       xsr.inelem = false;
+      xsr.startelem = false;
    }
 
    static void error( void * ctx,
