@@ -104,10 +104,3 @@ for(var i = 0; i < n; i++)
 console.timeEnd(n + '-parses');
 
 console.log(jobj);
-
-var j = {
-  "prop" : "value",
-  "prop2" : "value2"
-}
-
-console.log(j);
