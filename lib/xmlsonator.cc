@@ -77,8 +77,8 @@ public:
               ++indexAttribute, index += 5 )
         {
            const xmlChar *localname = attributes[index];
-           const xmlChar *prefix = attributes[index+1];
-           const xmlChar *nsURI = attributes[index+2];
+           //const xmlChar *prefix = attributes[index+1];
+           //const xmlChar *nsURI = attributes[index+2];
            const xmlChar *valueBegin = attributes[index+3];
            const xmlChar *valueEnd = attributes[index+4];
            std::string value( (const char *)valueBegin, (const char *)valueEnd );
