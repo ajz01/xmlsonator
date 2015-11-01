@@ -69,38 +69,30 @@ var buffer4 = Buffer(xml4, 'utf-8');
 
 var n = 10000
 
-console.time(n + '-parses');
+function test(buffer) {
+  console.log('\n**** Start Test ****\n');
 
-for(var i = 0; i < n; i++)
-  var jobj = xsr.toJson(buffer1);
+  console.time(n + '-parses');
 
-console.timeEnd(n + '-parses');
+  for(var i = 0; i < n; i++)
+    var jobj = xsr.toJson(buffer);
 
-console.log(jobj);
+  console.timeEnd(n + '-parses');
 
-console.time(n + '-parses');
+  console.log("\njson Object\n\n");
 
-for(var i = 0; i < n; i++)
-  var jobj = xsr.toJson(buffer2);
+  console.log(jobj);
 
-console.timeEnd(n + '-parses');
+  var jstr = JSON.stringify(jobj);
 
-console.log(jobj);
+  console.log("\njson string\n\n");
 
-console.time(n + '-parses');
+  console.log(jstr);
 
-for(var i = 0; i < n; i++)
-  var jobj = xsr.toJson(buffer3);
+  console.log('\n**** End Test ****\n');
+}
 
-console.timeEnd(n + '-parses');
-
-console.log(jobj);
-
-console.time(n + '-parses');
-
-for(var i = 0; i < n; i++)
-  var jobj = xsr.toJson(buffer4);
-
-console.timeEnd(n + '-parses');
-
-console.log(jobj);
+test(buffer1);
+test(buffer2);
+test(buffer3);
+test(buffer4);
