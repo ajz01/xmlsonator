@@ -82,7 +82,7 @@ public:
            const xmlChar *valueBegin = attributes[index+3];
            const xmlChar *valueEnd = attributes[index+4];
            std::string value( (const char *)valueBegin, (const char *)valueEnd );
-           tmp->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,(char*)value.c_str()));
+           tmp->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), String::NewFromUtf8(xsr.isolate_,value.c_str()));
            //printf("attribute: %s value: %s\n", localname, value.c_str());
         }
         obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
@@ -122,9 +122,6 @@ public:
             v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
             string strname2(*utfname2);
             Local<Object> tmp2 = tmp->Get(p2->Get(0)->ToString())->ToObject();
-            Local<Array> p3 = tmp2->GetPropertyNames();
-            v8::String::Utf8Value utfname3(p3->Get(0)->ToString());
-            string strname3(*utfname3);
             array->Set(i, tmp2);
             Local<Object> tmp = xsr.istack.back();
             xsr.istack.pop_back();
