@@ -36,13 +36,13 @@ public:
     Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
     if(xsr.startelem) {
       Local<Object> obj = xsr.ostack.back();
-      char chars[len + 1];
-      strncpy(chars, (const char *)ch, len);
-      chars[len] = (char)NULL;
-      //printf("characters: %s has: %s\n", xsr.beginelem, chars);
-      Local<Object> tmp = Object::New(xsr.isolate_);
-      tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,chars));
-      obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+      string str((char*)ch, len);
+      if(str.find_first_not_of(' ') != string::npos) {
+        //printf("characters: %s has: %i\n", xsr.beginelem, len);
+        Local<Object> tmp = Object::New(xsr.isolate_);
+        tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,str.c_str()));
+        obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+      }
     }
   }
 
