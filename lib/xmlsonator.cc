@@ -33,13 +33,21 @@ public:
     this->startelem = false;
   }
 
+static inline std::string trim(std::string& str)
+{
+str.erase(0, str.find_first_not_of(" \t\n"));       //prefixing spaces
+str.erase(str.find_last_not_of(" \t\n")+1);         //surfixing spaces
+return str;
+}
+
   // handle element inner text
   static void characters(void * ctx, const xmlChar * ch, int len) {
     Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
     if(xsr.startelem) {
       Local<Object> obj = xsr.ostack.back();
       string str((char*)ch, len);
-      if(str.find_first_not_of(' ') != string::npos) {
+      str = trim(str);
+      if(!str.empty()) {//if(str.find_first_not_of(" \t\n") != string::npos) {
         //printf("characters: %s has: %i\n", xsr.beginelem, len);
         Local<Object> tmp = Object::New(xsr.isolate_);
         tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,str.c_str()));
