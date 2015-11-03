@@ -29,6 +29,8 @@ public:
   Xmlsonator(Local<Object> obj, Isolate* isolate) {
     this->object_ = obj;
     this->isolate_ = isolate;
+    this->inelem = false;
+    this->startelem = false;
   }
 
   // handle element inner text
@@ -109,21 +111,39 @@ public:
         Local<Object> tmp = xsr.istack.back();
         xsr.istack.pop_back();
         Local<Array> p = obj->GetPropertyNames();
-        v8::String::Utf8Value utfname(p->Get(p->Length())->ToString());
+        v8::String::Utf8Value utfname(p->Get(p->Length()-1)->ToString());
         string strname(*utfname);
         if(n == 1) {
           // there is just an element no array
-          obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+          //printf("element: %s\n", xsr.beginelem);
+          //printf("name: %s\n", strname.c_str());
+          Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,strname.c_str()))->ToObject();
+          root->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
         } else if(n > 1) {
           // get the array and unwrap each element's name
           Local<Array> array = Array::New(xsr.isolate_, n);
-          for(int i = 0; i < n; i++) {
-            Local<Array> p2 = tmp->GetPropertyNames();
+          Local<Object> tmpa = tmp;
+          for(int i = n - 1; i >= 0; i--) {
+            Local<Array> p2 = tmpa->GetPropertyNames();
             v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
             string strname2(*utfname2);
-            Local<Object> tmp2 = tmp->Get(p2->Get(0)->ToString())->ToObject();
+            //printf("aname: %s\n", strname2.c_str());
+            Local<Object> tmp2 = tmpa->Get(p2->Get(0)->ToString())->ToObject();
+            Local<Array> p3 = tmp2->GetPropertyNames();
+            v8::String::Utf8Value str2(p3->Get(0)->ToString());
+            string strname3(*str2);
+            Local<Object> avalue = tmp2->Get(p3->Get(0)->ToString())->ToObject();
+            Local<Array> p4 = avalue->GetPropertyNames();
+            v8::String::Utf8Value utfname3(p4->Get(0)->ToString());
+            string strname4(*utfname3);
+            //printf("avalue: %s\n", strname3.c_str());
+            /*Local<Object> tmp3 = tmp2->Get(p2->Get(0)->ToString())->ToObject();
+            Local<Array> p4 = tmp3->GetPropertyNames();
+            v8::String::Utf8Value str3(p4->Get(0)->ToString());
+            string strname4(*str3);
+            printf("avalue2: %s\n", strname4.c_str());*/
             array->Set(i, tmp2);
-            Local<Object> tmp = xsr.istack.back();
+            tmpa = xsr.istack.back();
             xsr.istack.pop_back();
           }
           // add the array
@@ -173,9 +193,9 @@ private:
    // object stack
    vector<Local<Object>> ostack;
    vector<Local<Object>> istack;
-   bool inelem = false;
+   bool inelem;
    char* beginelem;
-   bool startelem = false;
+   bool startelem;
    char* elem;
 };
 

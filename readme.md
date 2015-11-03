@@ -41,7 +41,6 @@ console.log(jobj);
 
 ## Results
 ```
-10000-parses: 381ms
-{ menu: { id: 'file', value: 'File' },
-  popup: { menuitem: [ [Object], [Object], [Object] ] } }
+10000-parses: 479ms
+{ menu: { id: 'file', value: 'File', popup: { menuitem: [Object] } } }
 ```
