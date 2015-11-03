@@ -125,17 +125,17 @@ public:
           Local<Object> tmpa = tmp;
           for(int i = n - 1; i >= 0; i--) {
             Local<Array> p2 = tmpa->GetPropertyNames();
-            v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
-            string strname2(*utfname2);
+            //v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
+            //string strname2(*utfname2);
             //printf("aname: %s\n", strname2.c_str());
             Local<Object> tmp2 = tmpa->Get(p2->Get(0)->ToString())->ToObject();
-            Local<Array> p3 = tmp2->GetPropertyNames();
-            v8::String::Utf8Value str2(p3->Get(0)->ToString());
-            string strname3(*str2);
-            Local<Object> avalue = tmp2->Get(p3->Get(0)->ToString())->ToObject();
-            Local<Array> p4 = avalue->GetPropertyNames();
-            v8::String::Utf8Value utfname3(p4->Get(0)->ToString());
-            string strname4(*utfname3);
+            //Local<Array> p3 = tmp2->GetPropertyNames();
+            //v8::String::Utf8Value str2(p3->Get(0)->ToString());
+            //string strname3(*str2);
+            //Local<Object> avalue = tmp2->Get(p3->Get(0)->ToString())->ToObject();
+            //Local<Array> p4 = avalue->GetPropertyNames();
+            //v8::String::Utf8Value utfname3(p4->Get(0)->ToString());
+            //string strname4(*utfname3);
             //printf("avalue: %s\n", strname3.c_str());
             /*Local<Object> tmp3 = tmp2->Get(p2->Get(0)->ToString())->ToObject();
             Local<Array> p4 = tmp3->GetPropertyNames();
