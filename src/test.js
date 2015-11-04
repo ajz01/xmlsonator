@@ -66,8 +66,8 @@ console.timeEnd(n + '-parses');
 
 console.log(JSON.stringify(jobj));*/
 
-//testFile(file1);
-//testFile(file2);
+testFile(file1);
+testFile(file2);
 testFile(file3);
 //testFile(file4);
 //testFile(file5);

@@ -124,17 +124,28 @@ return str;
         v8::String::Utf8Value utfname(p->Get(p->Length()-1)->ToString());
         string strname(*utfname);
         if(n == 1) {
+          printf("here3\n");
           // there is just an element no array
           //printf("element: %s\n", xsr.beginelem);
           //printf("name: %s\n", strname.c_str());
           if(strname == "undefined") {
+            printf("%i\n", xsr.estack.size());
             obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
+            for(Local<Object> ob : xsr.estack) {
+              Local<Array> p3 = ob->GetPropertyNames();
+              v8::String::Utf8Value utfname3(p3->Get(0)->ToString());
+              string strname3(*utfname3);
+              Local<Object> tmp = Object::New(xsr.isolate_);
+              tmp->Set(p3->Get(0)->ToString(), ob);
+              obj->Set(p3->Get(0)->ToString(), tmp);
+            }
           } else {
+            printf("here5\n");
             Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,strname.c_str()))->ToObject();
             root->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
           }
         } else if(n > 1) {
-
+printf("here2\n");
           bool arr = true;
           string lastelem = "";
           for(int i = 1; i < n; i++) {
@@ -149,6 +160,7 @@ return str;
           }
 
           if(arr) {
+            printf("here6\n");
           // get the array and unwrap each element's name
           Local<Array> array = Array::New(xsr.isolate_, n);
           Local<Object> tmpa = tmp;
@@ -182,7 +194,9 @@ return str;
           obj->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), array);
         } else {
         Local<Object> tmpa = tmp;
-        //printf("here\n");
+        printf("here\n");
+        Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,(char*)localname))->ToObject();
+        xsr.estack.push_back(root);
         for(int i = 0; i < n - 1; i++) {
           Local<Array> p2 = tmpa->GetPropertyNames();
           v8::String::Utf8Value utfname2(p2->Get(p2->Length() - 1)->ToString());
@@ -190,14 +204,19 @@ return str;
           Local<String> value = tmpa->Get(p2->Get(p2->Length() - 1)->ToString())->ToString();
           //Local<Object> tmp2 = tmpa->Get(p2->Get(0)->ToString())->ToObject();
           //obj->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), tmpa);
-          Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,(char*)localname))->ToObject();
+          Local<Array> p3 = root->GetPropertyNames();
+          v8::String::Utf8Value utfname3(p3->Get(0)->ToString());
+          string strname3(*utfname3);
+          printf("root: %s", strname3.c_str());
           root->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), value);
-          printf("%i localname %s aname: %s\n", i, (char*) localname, strname2.c_str());
+          printf("%i localname %s aname: %s beginelem: %s\n", i, (char*) localname, strname2.c_str(), xsr.beginelem);
           tmpa = xsr.istack.back();
           xsr.istack.pop_back();
         }
       }
         xsr.istack.clear();
+        //for(Local<Object> ob : tmpv)
+        //  xsr.istack.push_back(ob);
       }
     }
 
@@ -253,13 +272,14 @@ private:
    Local<Object> object_;
    Isolate* isolate_;
    // object stack
-   deque<Local<Object>> ostack;
-   deque<Local<Object>> istack;
+   vector<Local<Object>> ostack;
+   vector<Local<Object>> istack;
    bool inelem;
    char* beginelem;
    bool startelem;
    char* elem;
    string buffer;
+   vector<Local<Object>> estack;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
