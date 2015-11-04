@@ -16,7 +16,7 @@ var file4 = 'xml/xml4.txt';
 var file5 = 'xml/xml5.txt';
 
 // number of times to convert xml to json Object
-var n = 10000;
+var n = 1;
 
 function testFile(file) {
   fs.readFile(file, function(err, data) {
@@ -51,7 +51,7 @@ function test(buffer) {
   console.log('\n**** End Test ****\n');
 }
 
-var buffer = Buffer(xml, 'utf-8');
+/*var buffer = Buffer(xml, 'utf-8');
 
 var n = 10000;
 
@@ -62,12 +62,12 @@ for(var i = 0; i < n; i++)
 
 console.timeEnd(n + '-parses');
 
-console.log(jobj);
+//console.log(jobj);
 
-console.log(JSON.stringify(jobj));
+console.log(JSON.stringify(jobj));*/
 
-/*testFile(file1);
-testFile(file2);
+//testFile(file1);
+//testFile(file2);
 testFile(file3);
-testFile(file4);*/
+//testFile(file4);
 //testFile(file5);

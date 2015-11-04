@@ -13,6 +13,7 @@
 #include <libxml/parser.h>
 #include <string>
 #include <vector>
+#include <deque>
 
 using namespace std;
 using namespace v8;
@@ -49,9 +50,10 @@ return str;
       str = trim(str);
       if(!str.empty()) {//if(str.find_first_not_of(" \t\n") != string::npos) {
         //printf("characters: %s has: %i\n", xsr.beginelem, len);
-        Local<Object> tmp = Object::New(xsr.isolate_);
-        tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,str.c_str()));
-        obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+        //Local<Object> tmp = Object::New(xsr.isolate_);
+        //tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,str.c_str()));
+        //obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+        xsr.buffer += str;
       }
     }
   }
@@ -125,9 +127,28 @@ return str;
           // there is just an element no array
           //printf("element: %s\n", xsr.beginelem);
           //printf("name: %s\n", strname.c_str());
-          Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,strname.c_str()))->ToObject();
-          root->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+          if(strname == "undefined") {
+            obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname), tmp);
+          } else {
+            Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,strname.c_str()))->ToObject();
+            root->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+          }
         } else if(n > 1) {
+
+          bool arr = true;
+          string lastelem = "";
+          for(int i = 1; i < n; i++) {
+            Local<Object> ob = xsr.istack[i];
+            Local<Array> obp = ob->GetPropertyNames();
+            v8::String::Utf8Value obn(obp->Get(0)->ToString());
+            string obs(*obn);
+            //printf("obs: %s\n", obs.c_str());
+            if(i > 1 && obs != lastelem)
+              arr = false;
+            lastelem = obs;
+          }
+
+          if(arr) {
           // get the array and unwrap each element's name
           Local<Array> array = Array::New(xsr.isolate_, n);
           Local<Object> tmpa = tmp;
@@ -159,8 +180,41 @@ return str;
           v8::String::Utf8Value utfname2(p2->Get(0)->ToString());
           string strname2(*utfname2);
           obj->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), array);
+        } else {
+        Local<Object> tmpa = tmp;
+        //printf("here\n");
+        for(int i = 0; i < n - 1; i++) {
+          Local<Array> p2 = tmpa->GetPropertyNames();
+          v8::String::Utf8Value utfname2(p2->Get(p2->Length() - 1)->ToString());
+          string strname2(*utfname2);
+          Local<String> value = tmpa->Get(p2->Get(p2->Length() - 1)->ToString())->ToString();
+          //Local<Object> tmp2 = tmpa->Get(p2->Get(0)->ToString())->ToObject();
+          //obj->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), tmpa);
+          Local<Object> root = obj->Get(String::NewFromUtf8(xsr.isolate_,(char*)localname))->ToObject();
+          root->Set(String::NewFromUtf8(xsr.isolate_,strname2.c_str()), value);
+          printf("%i localname %s aname: %s\n", i, (char*) localname, strname2.c_str());
+          tmpa = xsr.istack.back();
+          xsr.istack.pop_back();
         }
+      }
         xsr.istack.clear();
+      }
+    }
+
+      if(!xsr.buffer.empty()) {
+        /*if(strname == "undefined") {
+          printf("elem: %s\n", xsr.beginelem);
+          Local<Object> tmp = Object::New(xsr.isolate_);
+          tmp->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), String::NewFromUtf8(xsr.isolate_,xsr.buffer.c_str()));
+          obj->Set(String::NewFromUtf8(xsr.isolate_,xsr.beginelem), tmp);
+          //xsr.istack.push_back(tmp);
+        } else {*/
+          //printf("name2: %s\n", (char*)localname);
+          //Local<Object> tmp2 = obj->Get();
+          obj->Set(String::NewFromUtf8(xsr.isolate_,(char*)localname),  String::NewFromUtf8(xsr.isolate_,xsr.buffer.c_str()));
+          xsr.buffer.clear();
+        //}
+        //xsr.istack.push_back(obj);
       }
 
       xsr.istack.push_back(obj);
@@ -199,12 +253,13 @@ private:
    Local<Object> object_;
    Isolate* isolate_;
    // object stack
-   vector<Local<Object>> ostack;
-   vector<Local<Object>> istack;
+   deque<Local<Object>> ostack;
+   deque<Local<Object>> istack;
    bool inelem;
    char* beginelem;
    bool startelem;
    char* elem;
+   string buffer;
 };
 
 void parse(const FunctionCallbackInfo<Value>& args) {
