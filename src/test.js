@@ -9,11 +9,18 @@ var xml = "<menu id='file' value='File'> \
   </popup> \
 </menu>";
 
-var file1 = 'xml/xml1.txt';
-var file2 = 'xml/xml2.txt';
-var file3 = 'xml/xml3.txt';
-var file4 = 'xml/xml4.txt';
-var file5 = 'xml/xml5.txt';
+var file1 = 'xml/xml1';
+var file2 = 'xml/xml2';
+var file3 = 'xml/xml3';
+var file4 = 'xml/xml4';
+var file5 = 'xml/xml5';
+var file6 = 'xml/xml6';
+var file7 = 'xml/xml7';
+var file8 = 'xml/xml8';
+var file9 = 'xml/xml9';
+var file10 = 'xml/xml10';
+var file11 = 'xml/xml11';
+var file12 = 'xml/xml12';
 
 // number of times to convert xml to json Object
 var n = 1;
@@ -66,8 +73,9 @@ console.timeEnd(n + '-parses');
 
 console.log(JSON.stringify(jobj));*/
 
-testFile(file1);
-testFile(file2);
-testFile(file3);
+//testFile(file1);
+//testFile(file2);
+//testFile(file3);
 //testFile(file4);
 //testFile(file5);
+testFile(file12);
