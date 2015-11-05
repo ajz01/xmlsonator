@@ -112,7 +112,7 @@ public:
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
-        a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));
+        a->Set(i, p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
@@ -127,7 +127,7 @@ public:
         if(!name.empty() && !value.empty())
           obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,value.c_str()));
         else if(!name.empty())
-          obj->Set(String::NewFromUtf8(isolate,name.c_str()), v8::Null(isolate));        
+          obj->Set(String::NewFromUtf8(isolate,name.c_str()), v8::Null(isolate));
       }
     }
 
