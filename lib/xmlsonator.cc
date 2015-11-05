@@ -107,13 +107,15 @@ public:
   void ToObject(bool arr, Isolate* isolate) {
 
     if(value == "#array") {
-
+      int n = array.size();
+      printf("\narray: %i", n);
+      Local<Array> a = Array::New(isolate, n);
+      for(int i = 0; i < n; i++) {
+        Property* p = array[i];
+        a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));
+      }
+      obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
-      if(!name.empty() && !value.empty())
-        obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,value.c_str()));
-      else if(!name.empty())
-        obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,name.c_str()));
-
       if(!properties.empty()) {
         Local<Object> tmp = Object::New(isolate);
         for(auto p = properties.begin(); p != properties.end(); p++) {
@@ -121,6 +123,11 @@ public:
           tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
         }
         obj->Set(String::NewFromUtf8(isolate,name.c_str()), tmp);
+      } else {
+        if(!name.empty() && !value.empty())
+          obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,value.c_str()));
+        else if(!name.empty())
+          obj->Set(String::NewFromUtf8(isolate,name.c_str()), v8::Null(isolate));        
       }
     }
 
@@ -275,6 +282,8 @@ return str;
             old->value = "#array";
             old->array.push_back(p);
             old->array.push_back(xsr.ipstack[i]);
+            old->ToObject(false, xsr.isolate_);
+            p->ToObject(false, xsr.isolate_);
           } else
             property->properties[xsr.ipstack[i]->name] = xsr.ipstack[i];
           //printf("properties %i\n", property.properties.size());
@@ -385,7 +394,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
     args.GetReturnValue().Set(xsr.getProperty()->obj);
   }
 
-  xsr.getProperty()->Print(false);
+  //xsr.getProperty()->Print(false);
   xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
 
   printf("\n%s", xsr.getProperty()->str.c_str());

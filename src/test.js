@@ -1,3 +1,4 @@
+Object.keys(require.cache).forEach(function(key) { delete require.cache[key] });
 var xsr = require('./xmlsonator.js');
 var fs = require('fs');
 
@@ -36,26 +37,26 @@ function testFile(file) {
 
 // performance test
 function test(buffer) {
-  console.log('\n**** Start Test ****\n');
+  //console.log('\n**** Start Test ****\n');
 
-  console.time(n + '-parses');
+  //console.time(n + '-parses');
 
   for(var i = 0; i < n; i++)
     var jobj = xsr.toJson(buffer);
 
-  console.timeEnd(n + '-parses');
+  //console.timeEnd(n + '-parses');
 
-  console.log("\njson Object\n\n");
+  //console.log("\njson Object\n\n");
 
-  console.log(jobj);
+  //console.log(jobj);
 
   var jstr = JSON.stringify(jobj);
 
-  console.log("\njson string\n\n");
+  //console.log("\njson string\n\n");
 
-  console.log(jstr);
+  console.log('result: ' + jstr);
 
-  console.log('\n**** End Test ****\n');
+  //console.log('\n**** End Test ****\n');
 }
 
 /*var buffer = Buffer(xml, 'utf-8');
@@ -78,4 +79,10 @@ console.log(JSON.stringify(jobj));*/
 //testFile(file3);
 //testFile(file4);
 //testFile(file5);
+testFile(file6);
+testFile(file7);
+testFile(file8);
+testFile(file9);
+testFile(file10);
+testFile(file11);
 testFile(file12);
