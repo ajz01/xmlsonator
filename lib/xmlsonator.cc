@@ -21,6 +21,8 @@ using namespace node;
 
 struct Property {
 public:
+  enum type { parray, pstring, pobject };
+  type type;
   string name;
   string value;
   vector<Property*> array;
@@ -28,6 +30,7 @@ public:
   string str;
   Local<Object> obj;
   Property(Isolate* isolate) {
+    //type = Property::type::string;
     str = "";
     //name = "default";
     //value = "default";
@@ -112,7 +115,7 @@ public:
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
-        a->Set(i, p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
+        a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
@@ -120,7 +123,11 @@ public:
         Local<Object> tmp = Object::New(isolate);
         for(auto p = properties.begin(); p != properties.end(); p++) {
           //(*p).second->ToObject(false, isolate);
-          tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
+          if((*p).second->value == "#array") {
+            printf("\narray: %s\n", name.c_str());
+            tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
+          } else
+            tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), String::NewFromUtf8(isolate,(*p).second->value.c_str()));//(*p).second->obj);
         }
         obj->Set(String::NewFromUtf8(isolate,name.c_str()), tmp);
       } else {
@@ -279,6 +286,7 @@ return str;
           if(property->properties.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
             Property* p = old->clone(xsr.isolate_);
+            old->type = Property::parray;
             old->value = "#array";
             old->array.push_back(p);
             old->array.push_back(xsr.ipstack[i]);
