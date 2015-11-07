@@ -116,7 +116,7 @@ public:
 
     if(isArray) {
       int n = array.size();
-      printf("\narray: %i", n);
+      //printf("\narray: %i", n);
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
@@ -132,7 +132,7 @@ public:
         for(auto p = properties.begin(); p != properties.end(); p++) {
           //(*p).second->ToObject(false, isolate);
           if((*p).second->isArray) {
-            printf("\narray: %s\n", name.c_str());
+            //printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
           } else
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), String::NewFromUtf8(isolate,(*p).second->value.c_str()));//(*p).second->obj);
@@ -215,21 +215,23 @@ return str;
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
 
-      Property* p = new Property(xsr.isolate_);
-      p->name = string((char*)localname);
-      xsr.opstack.push_back(p);
-
-      if(!xsr.buffer.empty()) {
+      if(!xsr.buffer.empty() && !xsr.opstack.empty()) {
+        Property* old = xsr.opstack.back();
         //printf("\nleading %s \n", xsr.buffer.c_str());
         Property* tmp = new Property(xsr.isolate_);
         tmp->name = "#text";
         tmp->value = xsr.buffer;
-        p->properties["#text"] = tmp;
+        tmp->ToObject(false, xsr.isolate_);
+        old->properties["#text"] = tmp;
         xsr.buffer.clear();
         xsr.leadingtext = true;
         xsr.leadingproperty = tmp;
         xsr.leadingname = (char*)localname;
       }
+
+      Property* p = new Property(xsr.isolate_);
+      p->name = string((char*)localname);
+      xsr.opstack.push_back(p);
 
       //printf( "startElementNs: name = '%s' prefix = '%s' uri = (%p)'%s'\n", localname, prefix, URI, URI );
       for ( int indexNamespace = 0; indexNamespace < nb_namespaces; ++indexNamespace )
@@ -257,6 +259,7 @@ return str;
            string tmp((char*)localname);
            ap->name = '@' + tmp;
            ap->value = value;
+           ap->ToObject(false, xsr.isolate_);
            p->properties[tmp] = ap;
            //printf("attribute: %s value: %s\n", localname, value.c_str());
         }
@@ -313,23 +316,30 @@ return str;
 
       if(!xsr.buffer.empty()) {
         //printf("size: %i", property->properties.size());
-        if(!property->properties.empty()) {
-          if(xsr.leadingtext) {
-            //printf(xsr.leadingname.c_str());
-            Property* tmp = new Property(xsr.isolate_);
-            tmp->name = "#text";
-            tmp->value = xsr.leadingproperty->value;
-            property->properties[tmp->name] = tmp;
-            tmp = new Property(xsr.isolate_);
-            tmp->name = xsr.leadingname;
-            tmp->value = xsr.buffer;
-            property->properties[tmp->name] = tmp;
-          } else {
-            Property* tmp = new Property(xsr.isolate_);
-            tmp->name = "#text";
-            tmp->value = xsr.buffer;
-            property->properties["#text"] = tmp;
+
+        if(xsr.leadingtext) {
+          /*printf(xsr.leadingname.c_str());
+          Property* tmp = new Property(xsr.isolate_);
+          tmp->name = "#text";
+          tmp->value = xsr.leadingproperty->value;
+          property->properties["#text"] = xsr.leadingproperty;//tmp;*/
+          Property* old = xsr.opstack.back();
+          Property* tmp = new Property(xsr.isolate_);
+          tmp->name = xsr.leadingname;
+          //printf("\n%s\n", old->name.c_str());
+          tmp->value = xsr.buffer;
+          tmp->ToObject(false, xsr.isolate_);
+          old->properties[tmp->name] = tmp;
         }
+
+        if(!property->properties.empty()) {
+          //else {
+            Property* tmp = new Property(xsr.isolate_);
+            tmp->name = "#text";
+            tmp->value = xsr.buffer;
+            tmp->ToObject(false, xsr.isolate_);
+            property->properties["#text"] = tmp;
+          //}
         } else
           property->value = xsr.buffer;
 
