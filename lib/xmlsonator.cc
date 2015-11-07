@@ -268,7 +268,7 @@ return str;
            ap->value = value;
            ap->ToObject(false, xsr.isolate_);
            p->properties[ap->name] = ap;
-           printf("attribute: %s value: %s %s\n", localname, value.c_str(), p->name.c_str());
+           //printf("attribute: %s value: %s %s\n", localname, value.c_str(), p->name.c_str());
         }
       }
       xsr.inelem = true;
