@@ -135,14 +135,21 @@ public:
             //printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
           } else
-            tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), String::NewFromUtf8(isolate,(*p).second->value.c_str()));//(*p).second->obj);
+            //if((*p).second->type == Property::pobject)
+            //  tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
+            //else
+              tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
         }
         obj->Set(String::NewFromUtf8(isolate,name.c_str()), tmp);
       } else {
-        if(!name.empty() && !value.empty())
-          obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,value.c_str()));
-        else if(!name.empty())
-          obj->Set(String::NewFromUtf8(isolate,name.c_str()), v8::Null(isolate));
+        if(type == Property::pobject)
+          obj->Set(String::NewFromUtf8(isolate,name.c_str()), obj);
+        else {
+          if(!name.empty() && !value.empty())
+            obj->Set(String::NewFromUtf8(isolate,name.c_str()), String::NewFromUtf8(isolate,value.c_str()));
+          else if(!name.empty())
+            obj->Set(String::NewFromUtf8(isolate,name.c_str()), v8::Null(isolate));
+        }
       }
     }
 
@@ -260,8 +267,8 @@ return str;
            ap->name = '@' + tmp;
            ap->value = value;
            ap->ToObject(false, xsr.isolate_);
-           p->properties[tmp] = ap;
-           //printf("attribute: %s value: %s\n", localname, value.c_str());
+           p->properties[ap->name] = ap;
+           printf("attribute: %s value: %s %s\n", localname, value.c_str(), p->name.c_str());
         }
       }
       xsr.inelem = true;
