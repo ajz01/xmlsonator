@@ -54,7 +54,7 @@ function test(buffer) {
 
   //console.log("\njson string\n\n");
 
-  console.log('result: ' + jstr);
+  console.log(jstr);
 
   //console.log('\n**** End Test ****\n');
 }

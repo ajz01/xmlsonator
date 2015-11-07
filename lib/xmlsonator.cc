@@ -21,16 +21,19 @@ using namespace node;
 
 struct Property {
 public:
-  enum type { parray, pstring, pobject };
+  enum type { pvalue, pobject };
+  bool isArray;
   type type;
   string name;
   string value;
+  Property* object;
   vector<Property*> array;
   map<string, Property*> properties;
   string str;
   Local<Object> obj;
   Property(Isolate* isolate) {
-    //type = Property::type::string;
+    type = Property::pvalue;
+    isArray = false;
     str = "";
     //name = "default";
     //value = "default";
@@ -68,6 +71,8 @@ public:
   }
   Property* clone(Isolate* isolate) {
     Property* n = new Property(isolate);
+    n->type = this->type;
+    n->isArray = this->isArray;
     n->name = this->name;
     n->value = this->value;
     for(auto p = this->properties.begin(); p != this->properties.end(); p++) {
@@ -109,13 +114,16 @@ public:
   }
   void ToObject(bool arr, Isolate* isolate) {
 
-    if(value == "#array") {
+    if(isArray) {
       int n = array.size();
       printf("\narray: %i", n);
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
-        a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
+        if(p->type == Property::pobject)
+          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));
+        else
+          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
@@ -123,7 +131,7 @@ public:
         Local<Object> tmp = Object::New(isolate);
         for(auto p = properties.begin(); p != properties.end(); p++) {
           //(*p).second->ToObject(false, isolate);
-          if((*p).second->value == "#array") {
+          if((*p).second->isArray) {
             printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
           } else
@@ -283,11 +291,12 @@ return str;
 
           //printf("wrapper: %s prop: %s\n", property.name.c_str(), xsr.ipstack[i].name.c_str());
           // is array
-          if(property->properties.find(xsr.ipstack[i]->name) != property->properties.end()) {
+          if((*property->properties.begin()).second->name == xsr.ipstack[i]->name) {//.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
             Property* p = old->clone(xsr.isolate_);
-            old->type = Property::parray;
-            old->value = "#array";
+            //old->type = Property::array;
+            old->isArray = true;
+            //old->value = "#array";
             old->array.push_back(p);
             old->array.push_back(xsr.ipstack[i]);
             old->ToObject(false, xsr.isolate_);
@@ -403,7 +412,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
   }
 
   //xsr.getProperty()->Print(false);
-  xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
+  //xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
 
   printf("\n%s", xsr.getProperty()->str.c_str());
 
