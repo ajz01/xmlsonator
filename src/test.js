@@ -24,7 +24,7 @@ var file11 = 'xml/xml11';
 var file12 = 'xml/xml12';
 
 // number of times to convert xml to json Object
-var n = 1;
+var n = 10000;
 
 function testFile(file) {
   fs.readFile(file, function(err, data) {
@@ -39,12 +39,12 @@ function testFile(file) {
 function test(buffer) {
   //console.log('\n**** Start Test ****\n');
 
-  //console.time(n + '-parses');
+  console.time(n + '-parses');
 
   for(var i = 0; i < n; i++)
     var jobj = xsr.toJson(buffer);
 
-  //console.timeEnd(n + '-parses');
+  console.timeEnd(n + '-parses');
 
   //console.log("\njson Object\n\n");
 
@@ -75,7 +75,7 @@ console.timeEnd(n + '-parses');
 console.log(JSON.stringify(jobj));*/
 
 testFile(file1);
-testFile(file2);
+/*testFile(file2);
 testFile(file3);
 testFile(file4);
 testFile(file5);
@@ -85,4 +85,4 @@ testFile(file8);
 testFile(file9);
 testFile(file10);
 testFile(file11);
-testFile(file12);
+testFile(file12);*/
