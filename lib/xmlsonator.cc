@@ -40,7 +40,7 @@ public:
     obj = Object::New(isolate);
   }
   void Print(bool arr) {
-    if(value == "#array") {
+    if(isArray) {
       printf("{\"%s\": ", name.c_str());
       printf("[");
       for(int i = 0; i < array.size(); i++) {
@@ -78,6 +78,7 @@ public:
     for(auto p = this->properties.begin(); p != this->properties.end(); p++) {
       n->properties[(*p).second->name] = (*p).second->clone(isolate);
     }
+    n->array.reserve(this->array.size());
     for(int i = 0; i < this->array.size(); i++) {
       n->array[i] = this->array[i]->clone(isolate);
     }
@@ -120,10 +121,10 @@ public:
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
-        if(p->type == Property::pobject)
-          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));
-        else
-          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
+        //if(p->type == Property::pobject)
+          a->Set(i, p->obj);
+        //else
+        //  a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
@@ -135,10 +136,10 @@ public:
             //printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
           } else
-            //if((*p).second->type == Property::pobject)
-            //  tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
-            //else
+            if((*p).second->type == Property::pobject)
               tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj);
+            else
+              tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), String::NewFromUtf8(isolate,(*p).second->value.c_str()));
         }
         obj->Set(String::NewFromUtf8(isolate,name.c_str()), tmp);
       } else {
@@ -292,29 +293,34 @@ return str;
 
         //printf("opstack: %i\n", xsr.opstack.size());
         //printf("ipstack: %i\n", xsr.ipstack.size());
+        property->type = Property::pobject;
 
-        Property* last = property;
+        //Property* last = property;
         for(int i = 0; i < xsr.ipstack.size(); i++) {
-          if(xsr.opstack.size() == 1 && i == 0) {
-            property = xsr.opstack.back();
-          }
+          //if(xsr.opstack.size() == 1 && i == 0) {
+            //property = xsr.opstack.back();
+          //}
 
           //printf("wrapper: %s prop: %s\n", property.name.c_str(), xsr.ipstack[i].name.c_str());
           // is array
           if((*property->properties.begin()).second->name == xsr.ipstack[i]->name) {//.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
-            Property* p = old->clone(xsr.isolate_);
-            //old->type = Property::array;
-            old->isArray = true;
-            //old->value = "#array";
-            old->array.push_back(p);
+            if(property->properties.size() == 1) {
+              Property* p = old->clone(xsr.isolate_);
+              p->isArray = false;
+              //old->type = Property::array;
+              old->isArray = true;
+              //old->value = "#array";
+              p->ToObject(false, xsr.isolate_);
+              old->array.push_back(p);
+            }
+            //printf("\n%i\n",xsr.ipstack[i]->type);
             old->array.push_back(xsr.ipstack[i]);
             old->ToObject(false, xsr.isolate_);
-            p->ToObject(false, xsr.isolate_);
           } else
             property->properties[xsr.ipstack[i]->name] = xsr.ipstack[i];
           //printf("properties %i\n", property.properties.size());
-          property = last;
+          //property = last;
           xsr.ipstack[i]->ToObject(false, xsr.isolate_);
         }
 
@@ -428,7 +434,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
     args.GetReturnValue().Set(xsr.getProperty()->obj);
   }
 
-  //xsr.getProperty()->Print(false);
+  xsr.getProperty()->Print(false);
   //xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
 
   //printf("\n%s", xsr.getProperty()->str.c_str());
