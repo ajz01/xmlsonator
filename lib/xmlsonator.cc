@@ -205,10 +205,10 @@ return str;
   static void characters(void * ctx, const xmlChar * ch, int len) {
     Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       string str((char*)ch, len);
-      str = trim(str);
-      if(!str.empty()) {
+      //str = trim(str);
+      //if(!str.empty()) {
         xsr.buffer += str;
-      }
+      //}
   }
 
    static void startElementNs( void * ctx,
