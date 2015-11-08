@@ -85,7 +85,7 @@ public:
     return n;
   }
   void ToString(bool arr, string* s) {
-    if(value == "#array") {
+    if(isArray) {
       *s += "{" + name + ":";//printf("{\"%s\": ", name);
       *s += "["; //printf("[");
       for(int i = 0; i < array.size(); i++) {
@@ -269,6 +269,7 @@ return str;
            ap->value = value;
            ap->ToObject(false, xsr.isolate_);
            p->properties[ap->name] = ap;
+           p->type = Property::pobject;
            //printf("attribute: %s value: %s %s\n", localname, value.c_str(), p->name.c_str());
         }
       }
@@ -434,7 +435,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
     args.GetReturnValue().Set(xsr.getProperty()->obj);
   }
 
-  xsr.getProperty()->Print(false);
+  //xsr.getProperty()->Print(false);
   //xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
 
   //printf("\n%s", xsr.getProperty()->str.c_str());
