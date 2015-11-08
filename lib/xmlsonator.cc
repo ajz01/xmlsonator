@@ -26,7 +26,7 @@ public:
   type type;
   string name;
   string value;
-  Property* object;
+  //Property* object;
   vector<Property*> array;
   map<string, Property*> properties;
   string str;
@@ -431,7 +431,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
   //xsr.getProperty()->Print(false);
   //xsr.getProperty()->ToString(false, &(xsr.getProperty()->str));
 
-  printf("\n%s", xsr.getProperty()->str.c_str());
+  //printf("\n%s", xsr.getProperty()->str.c_str());
 
   xmlCleanupParser();
 
