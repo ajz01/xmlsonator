@@ -304,9 +304,9 @@ return str;
 
           //printf("wrapper: %s prop: %s\n", property.name.c_str(), xsr.ipstack[i].name.c_str());
           // is array
-          if((*property->properties.begin()).second->name == xsr.ipstack[i]->name) {//.find(xsr.ipstack[i]->name) != property->properties.end()) {
+          if(property->properties.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
-            if(property->properties.size() == 1) {
+            if(distance(property->properties.find(xsr.ipstack[i]->name), property->properties.end()) == 1) {//property->properties.size() == 1) {
               Property* p = old->clone(xsr.isolate_);
               p->isArray = false;
               //old->type = Property::array;
