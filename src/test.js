@@ -24,7 +24,7 @@ var file11 = 'xml/xml11';
 var file12 = 'xml/xml12';
 
 // number of times to convert xml to json Object
-var n = 1;
+var n = 10000;
 
 function testFile(file) {
   fs.readFile(file, function(err, data) {
