@@ -306,7 +306,7 @@ return str;
           // is array
           if(property->properties.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
-            if(distance(property->properties.find(xsr.ipstack[i]->name), property->properties.end()) == 1) {//property->properties.size() == 1) {
+            if(old->array.empty()) {//if(distance(property->properties.find(xsr.ipstack[i]->name), property->properties.end()) == 1) {//property->properties.size() == 1) {
               Property* p = old->clone(xsr.isolate_);
               p->isArray = false;
               //old->type = Property::array;
