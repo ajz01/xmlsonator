@@ -11,9 +11,6 @@
     "json",
     "parser"
   ],
-  "dependencies": {
-    "node-gyp": ">= 2.0.2"
-  },
   "author": "Andrew Zdenek",
   "license": "MIT",
   "repository": {
