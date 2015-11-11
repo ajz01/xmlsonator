@@ -6,7 +6,7 @@
           "-std=c++11"
       ],
       "dependencies": [
-        "./vendor/libxml/libxml.gyp:libxml"
+        "./lib/vendor/libxml/libxml.gyp:libxml"
       ],
       "conditions": [
         ["OS=='mac'", {
@@ -19,7 +19,7 @@
           },
         }]
       ],
-      "sources": [ "xmlsonator.cc" ]
+      "sources": [ "./lib/xmlsonator.cc" ]
     }
   ]
 }
