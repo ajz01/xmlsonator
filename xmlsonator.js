@@ -1,4 +1,4 @@
-var xsr = require('../build/Release/xmlsonator');
+var xsr = require('xmlsonator');
 
 exports.toJson = function(buffer) {
   return xsr.parseXML(buffer);
