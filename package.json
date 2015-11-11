@@ -1,6 +1,6 @@
 {
   "name": "xmlsonator",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "description": "high speed xml to json converter",
   "main": "xmlsonator.js",
   "scripts": {
