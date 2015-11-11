@@ -19,7 +19,7 @@
           },
         }]
       ],
-      "sources": [ "./lib/xmlsonator.cc" ]
+      "sources": [ "./src/xmlsonator.cc" ]
     }
   ]
 }

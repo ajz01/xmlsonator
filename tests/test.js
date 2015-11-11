@@ -1,5 +1,5 @@
 Object.keys(require.cache).forEach(function(key) { delete require.cache[key] });
-var xsr = require('./xmlsonator.js');
+var xsr = require('xmlsonator');
 var fs = require('fs');
 
 var xml = "<menu id='file' value='File'> \

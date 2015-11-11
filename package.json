@@ -2,7 +2,7 @@
   "name": "xmlsonator",
   "version": "0.0.39",
   "description": "high speed xml to json converter",
-  "main": "./src/xmlsonator.js",
+  "main": "xmlsonator.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
