@@ -205,10 +205,10 @@ return str;
   static void characters(void * ctx, const xmlChar * ch, int len) {
     Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       string str((char*)ch, len);
-      //str = trim(str);
-      //if(!str.empty()) {
+      str = trim(str);
+      if(!str.empty()) {
         xsr.buffer += str;
-      //}
+      }
   }
 
    static void startElementNs( void * ctx,
@@ -331,20 +331,20 @@ return str;
       if(!xsr.buffer.empty()) {
         //printf("size: %i", property->properties.size());
 
-        if(xsr.leadingtext) {
+        //if(xsr.leadingtext) {
           /*printf(xsr.leadingname.c_str());
           Property* tmp = new Property(xsr.isolate_);
           tmp->name = "#text";
           tmp->value = xsr.leadingproperty->value;
           property->properties["#text"] = xsr.leadingproperty;//tmp;*/
-          Property* old = xsr.opstack.back();
+          /*Property* old = xsr.opstack.back();
           Property* tmp = new Property(xsr.isolate_);
           tmp->name = xsr.leadingname;
           //printf("\n%s\n", old->name.c_str());
           tmp->value = xsr.buffer;
           tmp->ToObject(false, xsr.isolate_);
           old->properties[tmp->name] = tmp;
-        }
+        }*/
 
         if(!property->properties.empty()) {
           //else {
