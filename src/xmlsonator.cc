@@ -207,7 +207,8 @@ return str;
       string str((char*)ch, len);
       str = trim(str);
       if(!str.empty()) {
-        xsr.buffer += str;
+        string str2((char*)ch, len);
+        xsr.buffer += str2;
       }
   }
 
