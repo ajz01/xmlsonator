@@ -121,10 +121,10 @@ public:
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
-        //if(p->type == Property::pobject)
+        if(p->type == Property::pobject)
           a->Set(i, p->obj);
-        //else
-        //  a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
+        else
+          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
