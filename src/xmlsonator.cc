@@ -400,7 +400,7 @@ private:
    Isolate* isolate_;
    bool inelem;
    string buffer;
-   vector<string> elemnames;
+   //vector<string> elemnames;
    vector<Property*> opstack;
    vector<Property*> ipstack;
    Property* property;
