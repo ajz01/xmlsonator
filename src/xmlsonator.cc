@@ -30,13 +30,13 @@ public:
   map<string, Property*> properties;
   string str;
   Local<Object> obj;
-  Property(Isolate* isolate) {
+  inline Property(Isolate* isolate) {
     type = Property::pvalue;
     isArray = false;
     str = "";
     obj = Object::New(isolate);
   }
-  void Print(bool arr) {
+  inline void Print(bool arr) {
     if(isArray) {
       printf("{\"%s\": ", name.c_str());
       printf("[");
@@ -66,7 +66,7 @@ public:
         printf("}");
     }
   }
-  Property* clone(Isolate* isolate) {
+  inline Property* clone(Isolate* isolate) {
     Property* n = new Property(isolate);
     n->type = this->type;
     n->isArray = this->isArray;
@@ -81,7 +81,7 @@ public:
     }
     return n;
   }
-  void ToString(bool arr, string* s) {
+  inline void ToString(bool arr, string* s) {
     if(isArray) {
       *s += "{" + name + ":";//printf("{\"%s\": ", name);
       *s += "["; //printf("[");
@@ -110,7 +110,7 @@ public:
         *s += "}"; //printf("}");
     }
   }
-  void ToObject(bool arr, Isolate* isolate) {
+  inline void ToObject(bool arr, Isolate* isolate) {
 
     if(isArray) {
       int n = array.size();
@@ -422,7 +422,7 @@ void parse(const FunctionCallbackInfo<Value>& args) {
 }
 
 void init(Handle<Object> exports) {
-  NODE_SET_METHOD(exports, "parseXML", parse);
+  NODE_SET_METHOD(exports, "toJson", parse);
 }
 
 NODE_MODULE(xmlsonator, init)
