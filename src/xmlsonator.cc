@@ -26,7 +26,6 @@ public:
   type type;
   string name;
   string value;
-  //Property* object;
   vector<Property*> array;
   map<string, Property*> properties;
   string str;
@@ -35,8 +34,6 @@ public:
     type = Property::pvalue;
     isArray = false;
     str = "";
-    //name = "default";
-    //value = "default";
     obj = Object::New(isolate);
   }
   void Print(bool arr) {
@@ -153,29 +150,6 @@ public:
         }
       }
     }
-
-    /*if(value == "#array") {
-      int n = array.size();
-      Local<Array> a = Array::New(isolate, n);
-      for(int i = 0; i < n; i++) {
-        Property* p = array[i];
-        p->ToObject(arr, isolate);
-        a->Set(i, p->obj);
-      }
-      obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
-    } else {
-
-      Local<Object> property = Object::New(isolate);
-      for(auto p = properties.begin(); p != properties.end(); p++) {
-        (*p).second->ToObject(false, isolate);
-        Local<Array> p2 = (*p).second->obj->GetPropertyNames();
-        v8::String::Utf8Value utfname(p2->Get(0)->ToString());
-        string strname(*utfname);
-        property->Set(String::NewFromUtf8(isolate,strname.c_str()), (*p).second->obj);
-      }
-
-      obj->Set(String::NewFromUtf8(isolate,name.c_str()), property);
-    }*/
   }
 };
 
