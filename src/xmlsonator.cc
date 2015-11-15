@@ -128,7 +128,6 @@ public:
       if(!properties.empty()) {
         Local<Object> tmp = Object::New(isolate);
         for(auto p = properties.begin(); p != properties.end(); p++) {
-          //(*p).second->ToObject(false, isolate);
           if((*p).second->isArray) {
             //printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
@@ -198,6 +197,7 @@ return str;
    {
       Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
 
+      // handle enclosed text
       if(!xsr.buffer.empty() && !xsr.opstack.empty()) {
         Property* old = xsr.opstack.back();
         //printf("\nleading %s \n", xsr.buffer.c_str());
@@ -271,11 +271,8 @@ return str;
         //printf("ipstack: %i\n", xsr.ipstack.size());
         property->type = Property::pobject;
 
-        //Property* last = property;
+        // wrap inner elements
         for(int i = 0; i < xsr.ipstack.size(); i++) {
-          //if(xsr.opstack.size() == 1 && i == 0) {
-            //property = xsr.opstack.back();
-          //}
 
           //printf("wrapper: %s prop: %s\n", property.name.c_str(), xsr.ipstack[i].name.c_str());
           // is array
@@ -284,9 +281,7 @@ return str;
             if(old->array.empty()) {//if(distance(property->properties.find(xsr.ipstack[i]->name), property->properties.end()) == 1) {//property->properties.size() == 1) {
               Property* p = old->clone(xsr.isolate_);
               p->isArray = false;
-              //old->type = Property::array;
               old->isArray = true;
-              //old->value = "#array";
               p->ToObject(false, xsr.isolate_);
               old->array.push_back(p);
             }
@@ -296,7 +291,6 @@ return str;
           } else
             property->properties[xsr.ipstack[i]->name] = xsr.ipstack[i];
           //printf("properties %i\n", property.properties.size());
-          //property = last;
           xsr.ipstack[i]->ToObject(false, xsr.isolate_);
         }
 

@@ -15,7 +15,7 @@ Object = xmlsonator.toJson(Buffer);
 ## Example program with performance results
 
 ```javascript
-var xsr = require('xmlsonator');
+var xsr = require('../build/Release/xmlsonator');
 
 var xml = "<menu id='file' value='File'> \
   <popup> \
