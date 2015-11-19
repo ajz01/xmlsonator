@@ -19,6 +19,10 @@ using namespace std;
 using namespace v8;
 using namespace node;
 
+// reprents a JSON property which can be either a
+// key value pair (plain text) or an Object
+// the property can also be single instance or an
+// array of either of these types
 struct Property {
 public:
   enum type { pvalue, pobject };
@@ -36,6 +40,10 @@ public:
     str = "";
     obj = Object::New(isolate);
   }
+
+  // print the JSON to stdout
+  // mostly for debugging or
+  // inspection purposes
   inline void Print(bool arr) {
     if(isArray) {
       printf("{\"%s\": ", name.c_str());
@@ -66,6 +74,8 @@ public:
         printf("}");
     }
   }
+
+  // clone (deep copy) an existing property
   inline Property* clone(Isolate* isolate) {
     Property* n = new Property(isolate);
     n->type = this->type;
@@ -110,8 +120,10 @@ public:
         *s += "}"; //printf("}");
     }
   }
-  inline void ToObject(bool arr, Isolate* isolate) {
 
+  // serialize (convert) to the local JSON object
+  // for use in javascript code
+  inline void ToObject(bool arr, Isolate* isolate) {
     if(isArray) {
       int n = array.size();
       //printf("\narray: %i", n);
@@ -167,6 +179,7 @@ public:
     this->leadingtext = false;
   }
 
+// trim whitespace
 static inline std::string trim(std::string& str)
 {
 str.erase(0, str.find_first_not_of(" \t\n"));       //prefixing spaces
