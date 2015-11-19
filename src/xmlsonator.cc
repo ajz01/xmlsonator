@@ -58,7 +58,7 @@ public:
         printf("\"%s\": %s", name.c_str(), value.c_str());
       else
         printf("%s", value.c_str());
-      //printf("\np: %i\n", properties.size());
+
       bool set = false;
       if(properties.size() > 1)
         set = true;
@@ -66,7 +66,6 @@ public:
       if(set)
         printf("{");
       for(auto p = properties.begin(); p != properties.end(); p++) {
-        //printf(" prop: %s ", (*p).first);
         (*p).second->Print(false);
         printf(",");
       }
@@ -91,33 +90,44 @@ public:
     }
     return n;
   }
+
+  // serialize (convert) to JSON string
+  // may use this to send back to
+  // javascript in case the user wants
+  // to use the strinfified version instead
+  // of an actual object. This could be
+  // passed back as a custom javascript
+  // object with two properties one containing
+  // the JSON Object and the other the string
+  // since they both can be constructed after
+  // a single pass through the parser
   inline void ToString(bool arr, string* s) {
     if(isArray) {
-      *s += "{" + name + ":";//printf("{\"%s\": ", name);
-      *s += "["; //printf("[");
+      *s += "{" + name + ":";
+      *s += "[";
       for(int i = 0; i < array.size(); i++) {
         array[i]->ToString(true, s);
-        *s += ",";//printf(", ");
+        *s += ",";
       }
-      *s += "]}"; //printf("]}");
+      *s += "]}";
     } else {
       if(!arr)
-        *s += "\"" + name + "\": " + value; //printf("\"%s\": %s", name, value);
+        *s += "\"" + name + "\": " + value;
       else
-        *s += value; //printf("%s", value);
+        *s += value;
 
       bool set = false;
       if(properties.size() > 1)
         set = true;
 
       if(set)
-        *s += "{"; //printf("{");
+        *s += "{";
       for(auto p = properties.begin(); p != properties.end(); p++) {
         (*p).second->ToString(false, s);
-        *s += ","; //printf(",");
+        *s += ",";
       }
       if(set)
-        *s += "}"; //printf("}");
+        *s += "}";
     }
   }
 
@@ -126,14 +136,13 @@ public:
   inline void ToObject(bool arr, Isolate* isolate) {
     if(isArray) {
       int n = array.size();
-      //printf("\narray: %i", n);
       Local<Array> a = Array::New(isolate, n);
       for(int i = 0; i < n; i++) {
         Property* p = array[i];
         if(p->type == Property::pobject)
           a->Set(i, p->obj);
         else
-          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));//p->obj);//String::NewFromUtf8(isolate,p->value.c_str()));
+          a->Set(i, String::NewFromUtf8(isolate,p->value.c_str()));
       }
       obj->Set(String::NewFromUtf8(isolate,name.c_str()), a);
     } else {
@@ -141,7 +150,6 @@ public:
         Local<Object> tmp = Object::New(isolate);
         for(auto p = properties.begin(); p != properties.end(); p++) {
           if((*p).second->isArray) {
-            //printf("\narray: %s\n", name.c_str());
             tmp->Set(String::NewFromUtf8(isolate,(*p).second->name.c_str()), (*p).second->obj->Get(String::NewFromUtf8(isolate,(*p).second->name.c_str())));
           } else
             if((*p).second->type == Property::pobject)
@@ -213,7 +221,6 @@ return str;
       // handle enclosed text
       if(!xsr.buffer.empty() && !xsr.opstack.empty()) {
         Property* old = xsr.opstack.back();
-        //printf("\nleading %s \n", xsr.buffer.c_str());
         Property* tmp = new Property(xsr.isolate_);
         tmp->name = "#text";
         tmp->value = xsr.buffer;
@@ -229,12 +236,10 @@ return str;
       p->name = string((char*)localname);
       xsr.opstack.push_back(p);
 
-      //printf( "startElementNs: name = '%s' prefix = '%s' uri = (%p)'%s'\n", localname, prefix, URI, URI );
       for ( int indexNamespace = 0; indexNamespace < nb_namespaces; ++indexNamespace )
       {
          const xmlChar *prefix = namespaces[indexNamespace*2];
          const xmlChar *nsURI = namespaces[indexNamespace*2+1];
-         //printf( "  namespace: name='%s' uri=(%p)'%s'\n", prefix, nsURI, nsURI );
       }
 
       // if the element has attributes create an object otherwise store the name
@@ -258,7 +263,6 @@ return str;
            ap->ToObject(false, xsr.isolate_);
            p->properties[ap->name] = ap;
            p->type = Property::pobject;
-           //printf("attribute: %s value: %s %s\n", localname, value.c_str(), p->name.c_str());
         }
       }
       xsr.inelem = true;
@@ -275,35 +279,27 @@ return str;
       xsr.opstack.pop_back();
       xsr.property = property;
 
-      //printf("end prop: %s\n", property.name.c_str());
-
       // if at the end of a wrapping element (last callback was also an endElement)
       if(!xsr.inelem) {
-
-        //printf("opstack: %i\n", xsr.opstack.size());
-        //printf("ipstack: %i\n", xsr.ipstack.size());
         property->type = Property::pobject;
 
         // wrap inner elements
         for(int i = 0; i < xsr.ipstack.size(); i++) {
 
-          //printf("wrapper: %s prop: %s\n", property.name.c_str(), xsr.ipstack[i].name.c_str());
           // is array
           if(property->properties.find(xsr.ipstack[i]->name) != property->properties.end()) {
             Property* old = property->properties[xsr.ipstack[i]->name];
-            if(old->array.empty()) {//if(distance(property->properties.find(xsr.ipstack[i]->name), property->properties.end()) == 1) {//property->properties.size() == 1) {
+            if(old->array.empty()) {
               Property* p = old->clone(xsr.isolate_);
               p->isArray = false;
               old->isArray = true;
               p->ToObject(false, xsr.isolate_);
               old->array.push_back(p);
             }
-            //printf("\n%i\n",xsr.ipstack[i]->type);
             old->array.push_back(xsr.ipstack[i]);
             old->ToObject(false, xsr.isolate_);
           } else
             property->properties[xsr.ipstack[i]->name] = xsr.ipstack[i];
-          //printf("properties %i\n", property.properties.size());
           xsr.ipstack[i]->ToObject(false, xsr.isolate_);
         }
 
@@ -311,35 +307,15 @@ return str;
       }
 
       if(!xsr.buffer.empty()) {
-        //printf("size: %i", property->properties.size());
-
-        //if(xsr.leadingtext) {
-          /*printf(xsr.leadingname.c_str());
-          Property* tmp = new Property(xsr.isolate_);
-          tmp->name = "#text";
-          tmp->value = xsr.leadingproperty->value;
-          property->properties["#text"] = xsr.leadingproperty;//tmp;*/
-          /*Property* old = xsr.opstack.back();
-          Property* tmp = new Property(xsr.isolate_);
-          tmp->name = xsr.leadingname;
-          //printf("\n%s\n", old->name.c_str());
-          tmp->value = xsr.buffer;
-          tmp->ToObject(false, xsr.isolate_);
-          old->properties[tmp->name] = tmp;
-        }*/
-
         if(!property->properties.empty()) {
-          //else {
             Property* tmp = new Property(xsr.isolate_);
             tmp->name = "#text";
             tmp->value = xsr.buffer;
             tmp->ToObject(false, xsr.isolate_);
             property->properties["#text"] = tmp;
-          //}
         } else
           property->value = xsr.buffer;
 
-        //printf("\nbuffer: %s\n", xsr.buffer);
         xsr.buffer.clear();
       }
 
@@ -353,7 +329,6 @@ return str;
                       const char * msg,
                       ... )
    {
-      //Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       va_list args;
       va_start(args, msg);
       vprintf( msg, args );
@@ -364,7 +339,6 @@ return str;
                         const char * msg,
                         ... )
    {
-      //Xmlsonator &xsr = *( static_cast<Xmlsonator *>( ctx ) );
       va_list args;
       va_start(args, msg);
       vprintf( msg, args );
@@ -376,12 +350,10 @@ return str;
 
 private:
 
-   // return Object
-   Local<Object> object_;
+   Local<Object> object_;             // return Object
    Isolate* isolate_;
    bool inelem;
    string buffer;
-   //vector<string> elemnames;
    vector<Property*> opstack;
    vector<Property*> ipstack;
    Property* property;
