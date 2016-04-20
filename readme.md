@@ -6,10 +6,13 @@ Benchmark shows potentially 20 times faster than other popular xml to json packa
 # Usage
 This project is just getting started so test your specific xml format before using.
 
+
 There is only one method:
 
 ```javascript
 Object = xmlsonator.toJson(Buffer);
+
+Considering adding an async method using libuv.
 ```
 
 ## Example program with performance results
