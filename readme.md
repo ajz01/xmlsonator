@@ -12,8 +12,9 @@ There is only one method:
 ```javascript
 Object = xmlsonator.toJson(Buffer);
 
-Considering adding an async method using libuv.
 ```
+
+Considering adding an async method using libuv.
 
 ## Example program with performance results
 
